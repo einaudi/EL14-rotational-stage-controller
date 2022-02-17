@@ -105,7 +105,7 @@ Parameters:
 
 * v - speed of the device in percentage of maximal speed
 
-![speed_calibration](./tests/plots/speed_calibration.png)
+![speed_calibration](./graphics/speed_calibration.png)
 
 ### `set_jog_step`
 Set the angle by which stage rotates when in jog mode.  
