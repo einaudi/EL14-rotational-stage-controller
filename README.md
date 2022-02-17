@@ -66,7 +66,7 @@ requests.get(
 Device can be triggered on pin D6 which calls external interrupt handling routine. This function stops current job of the nodeMCU and moves the stage to `angle_min` position (this function can be changed in the software). This mode should be used when all other requests are done and device is ready as it may interfere with the request handling. It is useful when one wants to have precise timing of the rotation.
 
 ### Flashing new software
-Flashing new software faces the same problems as power up part - serial communication cross. For the upload of new software the devices should be disconnected. Current software in PlatfromIO project can be downloaded [here](https://drive.google.com/drive/folders/1zUkqIa4bSzibQwh4zjUx1g9AN25MgS32?usp=sharing).
+Flashing new software faces the same problems as power up part - serial communication cross. For the upload of new software the devices should be disconnected. Current software in PlatfromIO project can be downloaded from gDrive [here](https://drive.google.com/drive/folders/1zUkqIa4bSzibQwh4zjUx1g9AN25MgS32?usp=sharing) or from github [here](https://github.com/einaudi/EL14-rotational-stage-controller.git).
 
 ## Available server paths
 ### `home`
@@ -128,7 +128,7 @@ Parameters:
 * max - angle to be set as `angle_max`
 
 ### `calibration_min_max`
-Turns on the calibration of `angle_min` and `angle_max` procedure. The stage goes to 0 deg absolute position and starts to rotate by 1 deg up to 120 deg (in this range it should cover polarizer/half-waveplate range of intensity change). At each position a measurement of light intensity is taken - photodiode must be connected. New values of `angle_min` and `angle_max` are calculated where the intensity is minimal and maximal respectively. If the angular range of calibration is to broad it needs to be changed as the procedure may detect two minimas/maximas and not acquire the following angles correctly.
+Turns on the calibration of `angle_min` and `angle_max` procedure. The stage goes to 0 deg absolute position and starts to rotate by 1 deg up to 120 deg (in this range it should cover polarizer/half-waveplate range of intensity change). At each position a measurement of light intensity is taken - photodiode must be connected. New values of `angle_min` and `angle_max` are calculated where the intensity is minimal and maximal respectively. If the angular range of calibration is too broad it needs to be changed as the procedure may detect two minimas/maximas and not acquire the following angles correctly.
 
 ### `set_calibration_ranges`
 Set the ranges of angles for which the calibration is done. Values are stored in non-volatile memory and will be remembered after power-down.  

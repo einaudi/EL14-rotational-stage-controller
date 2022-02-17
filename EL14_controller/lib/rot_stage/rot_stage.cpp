@@ -40,7 +40,7 @@ void init_rot_stage() {
     Serial.begin(9600);
     while(!Serial) {}
     Serial.swap();
-
+    
     Serial.print("0gs\n");
     String ret = Serial.readStringUntil('\n');
     set_speed(100);

@@ -22,7 +22,7 @@ const String available_cmds[] = {
   "set_angle_time",
   "set_min_max",
   "set_calibration_ranges",
-  "calibration_min_max",
+  "calibration_min_max"
 };
 
 /* Put your SSID & Password */
@@ -203,18 +203,27 @@ void handle_calibration_min_max() {
 // Cicero handler
 void handle_getdata() {
   // Server data
-  DynamicJsonDocument serverData(2048);
-  serverData["server_name"] = "EL14_controler";
-  serverData["receive_data"] = false;
-  JsonArray cmds = serverData.createNestedArray("available_commands");
-  for(int i=0; i < sizeof(available_cmds); i++) {
-    cmds.add(available_cmds[i]);
+  StaticJsonDocument<420> doc;
+  doc["server_name"] = "EL14_controller";
+  doc["receive_data"] = false;
+  JsonArray cmds = doc.createNestedArray("available_commands");
+  //for(int i=0; i < sizeof(available_cmds); i++) {
+  for(const String &cmd : available_cmds) {
+    cmds.add(cmd);
   }
   // json to string
-  String json;
-  serializeJson(serverData, json);
+  String serverData;
+  serializeJson(doc, serverData);
 
-  server.send(200, "text/html", json);
+  /*
+  String json = "{\"server_name\":\"EL14_controler\",\"receive_data\":false,\"available_commands\":[";
+  for(int i=0; i < sizeof(available_cmds); i++) {
+    json += "\"" + available_cmds[i] + "\",";
+  }
+  json = json.substring(0, -1) + "]}";
+  */
+
+  server.send(200, "text/html", serverData);
 }
 
 void handle_start() {
