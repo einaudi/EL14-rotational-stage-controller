@@ -48,7 +48,7 @@ requests.get(
 requests.get(
 	url + 'home',
 	params={
-		'dir' : speed
+		'dir' : 1
 	}
 )
 requests.get(
