@@ -155,7 +155,10 @@ Rotate to absolute position defined as `angle_max`. `angle_max` can be set by co
 Cicero syntax: `move_max@\n`
 
 ### `set_speed`
-Set the speed of the device. Value is encoded in percentage of maximal speed. Measured [deg/s] vs [%] calibration is shown in the plot below.  
+Set the speed of the device. Value is encoded in percentage of maximal speed. Measured [deg/s] vs [%] calibration is shown in the plot below. Formula fitted to data points was:  
+$f(x)=\frac{A_6}{x-A_7}+A_0+A_1x+A_2x^2+A_3x^3+A_4x^4+A_5x^5$  
+This calibration may be dependent on load attached to the stage. Guess is, that it won't be for small and light objects. It was measured with a linear polarizer.  
+It is hard to measure it with the device itself, so it should be done externally with oscilloscope and higher data analysis capabilities than the device has. I've done it in such a way, that I chose two angles that result in different light intensity measured, one lower and one higher. Then I measured the temporal intensity change for different percentage speed and with python analysed them to obtain the time in which the device rotates. From that and angles difference I was able to get the calibration curve.  
 Parameters:
 
 * v - speed of the device in percentage of maximal speed
@@ -170,7 +173,7 @@ Parameters:
 
 * step - jog step [deg] to set
 
-Cicero syntax: `set_jog_step@setp\n`
+Cicero syntax: `set_jog_step@step\n`
 
 ### `set_angle_time`
 Sets the velocity such that rotation by input angle will take input time.  
