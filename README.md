@@ -60,7 +60,48 @@ requests.get(
 ```
 
 #### Cicero
-**TODO commands in Cicero**
+When working with Cicero, the commands names are the same, however architecture of handler doesn't allow for key-value syntax. All commands are sent with key `params` in order set in Cicero RS232 group. Software version compatible with Cicero reads those parameters in set order. If one wants to use software version with key-value syntax, handling functions in server part need to be changed (different parts of code already written should be used). Example is shown below.
+
+Key-value code:
+
+```c++
+void handle_set_min_max() {
+  /*
+  set_min(server.arg(0).toFloat());
+  set_max(server.arg(1).toFloat());
+  */
+  for (uint8_t i = 0; i < server.args(); i++) {
+    if(server.argName(i) == (const String)"min") {
+      set_min(server.arg(i).toFloat());
+    }
+    else if(server.argName(i) == (const String)"max") {
+      set_max(server.arg(i).toFloat());
+    }
+  }
+  
+  server.send(200, "text/html", "Min and max set");
+}
+```
+
+Cicero compatible code:
+
+```c++
+void handle_set_min_max() {
+  set_min(server.arg(0).toFloat());
+  set_max(server.arg(1).toFloat());
+  /*
+  for (uint8_t i = 0; i < server.args(); i++) {
+    if(server.argName(i) == (const String)"min") {
+      set_min(server.arg(i).toFloat());
+    }
+    else if(server.argName(i) == (const String)"max") {
+      set_max(server.arg(i).toFloat());
+    }
+  }
+  */
+  server.send(200, "text/html", "Min and max set");
+}
+```
 
 ### Trigger mode
 Device can be triggered on pin D6 which calls external interrupt handling routine. This function stops current job of the nodeMCU and moves the stage to `angle_min` position (this function can be changed in the software). This mode should be used when all other requests are done and device is ready as it may interfere with the request handling. It is useful when one wants to have precise timing of the rotation.
@@ -73,31 +114,45 @@ Flashing new software faces the same problems as power up part - serial communic
 Rotates the stage to home position. By default it is absolute 0 deg.  
 Parameters:
 
-* dir - direction of rotation - 0 for clockwise ant 1 for anticlockwise.
+* dir - direction of rotation - 0 for clockwise ant 1 for counterclockwise.
+
+Cicero syntax: `home@dir\n`
 
 ### `move_absolute`
 Rotates the stage to absolute position.  
 Parameters:  
 
-* deg - new absolute position angle
+* deg - new absolute position angle [deg]c
+
+Cicero syntax: `move_absolute@deg\n`
 
 ### `move_relative`
-Rotates the stage by specified angle from its current position. Angle can be negative.  
+Rotates the stage by specified angle from its current position. Positive angle rotates clockwise, negative angle rotates counterclockwise.  
 Parameters:  
 
-* deg - angle to rotate by
+* deg - angle [deg] to rotate by
+
+Cicero syntax: `move_relative@deg\n`
 
 ### `move_fwd`
 Rotate forward by angle defined as jog step.
 
+Cicero syntax: `move_fwd@\n`
+
 ### `move_bwd`
 Rotate backward by angle defined as jog step.
+
+Cicero syntax: `move_bwd@\n`
 
 ### `move_min`
 Rotate to absolute position defined as `angle_min`. `angle_min` can be set by command or by calibration and is stored in non-volatile memory (it is remembered after power down).
 
+Cicero syntax: `move_min@\n`
+
 ### `move_max`
 Rotate to absolute position defined as `angle_max`. `angle_max` can be set by command or by calibration and is stored in non-volatile memory (it is remembered after power down).
+
+Cicero syntax: `move_max@\n`
 
 ### `set_speed`
 Set the speed of the device. Value is encoded in percentage of maximal speed. Measured [deg/s] vs [%] calibration is shown in the plot below.  
@@ -105,36 +160,48 @@ Parameters:
 
 * v - speed of the device in percentage of maximal speed
 
+Cicero syntax: `set_speed@v\n`
+
 ![speed_calibration](./graphics/speed_calibration.png)
 
 ### `set_jog_step`
 Set the angle by which stage rotates when in jog mode.  
 Parameters:
 
-* step - jog step to set
+* step - jog step [deg] to set
+
+Cicero syntax: `set_jog_step@setp\n`
 
 ### `set_angle_time`
 Sets the velocity such that rotation by input angle will take input time.  
 Parameters:
 
-* angle - rotation angle
-* time - time the rotation by angle should take
+* angle - rotation angle [deg]
+* time - time [s] the rotation by angle should take
+
+Cicero syntax: `set_angle_time@angle_time\n`
 
 ### `set_min_max`
 Set `angle_min` and `angle_max` parameters. They are also stored in non-volatile memory and will be remembered after power-down.  
 Parameters:
 
-* min - angle to be set as `angle_min`
-* max - angle to be set as `angle_max`
+* min - angle [deg] to be set as `angle_min`
+* max - angle [deg] to be set as `angle_max`
+
+Cicero syntax: `set_min_max@min_max\n`
 
 ### `calibration_min_max`
 Turns on the calibration of `angle_min` and `angle_max` procedure. The stage goes to 0 deg absolute position and starts to rotate by 1 deg up to 120 deg (in this range it should cover polarizer/half-waveplate range of intensity change). At each position a measurement of light intensity is taken - photodiode must be connected. New values of `angle_min` and `angle_max` are calculated where the intensity is minimal and maximal respectively. If the angular range of calibration is too broad it needs to be changed as the procedure may detect two minimas/maximas and not acquire the following angles correctly.
+
+Cicero syntax: `calibration_min_max@\n`
 
 ### `set_calibration_ranges`
 Set the ranges of angles for which the calibration is done. Values are stored in non-volatile memory and will be remembered after power-down.  
 Parameters:
 
-* min - start angle of calibration
-* max - end angle of calibration
+* min - start angle [deg] of calibration
+* max - end angle [deg] of calibration
+
+Cicero syntax: `set_calibration_ranges@min_max\n`
 
 

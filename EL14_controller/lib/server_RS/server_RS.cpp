@@ -86,29 +86,38 @@ void handle_NotFound() {
 
 // Move
 void handle_home() {
+  move_home((bool)server.arg(0).toInt());
+  /*
   for (uint8_t i = 0; i < server.args(); i++) {
     if(server.argName(i) == (const String)"dir") {
       move_home((bool)server.arg(i).toInt());
     }
   }
+  */
   server.send(200, "text/html", "Position changed to home");
 }
 
 void handle_move_absolute() {
+  move_absolute(server.arg(0).toFloat());
+  /*
   for (uint8_t i = 0; i < server.args(); i++) {
     if(server.argName(i) == (const String)"deg") {
       move_absolute(server.arg(i).toFloat());
     }
   }
+  */
   server.send(200, "text/html", "Position changed to absolute");
 }
 
 void handle_move_relative() {
+  move_relative(server.arg(0).toFloat());
+  /*
   for (uint8_t i = 0; i < server.args(); i++) {
     if(server.argName(i) == (const String)"deg") {
       move_relative(server.arg(i).toFloat());
     }
   }
+  */
   server.send(200, "text/html", "Position changed to relative");
 }
 
@@ -134,24 +143,33 @@ void handle_move_max() {
 
 // Settings
 void handle_set_speed() {
+  set_speed(server.arg(0).toInt());
+  /*
   for (uint8_t i = 0; i < server.args(); i++) {
     if(server.argName(i) == (const String)"v") {
       set_speed(server.arg(i).toInt());
     }
   }
+  */
   server.send(200, "text/html", "Speed set");
 }
 
 void handle_set_jog_step() {
+  set_jog_step(server.arg(0).toFloat());
+  /*
   for (uint8_t i = 0; i < server.args(); i++) {
     if(server.argName(i) == (const String)"step") {
       set_jog_step(server.arg(i).toFloat());
     }
   }
+  */
   server.send(200, "text/html", "Jog step set");
 }
 
 void handle_set_angle_time() {
+  float angle = server.arg(0).toFloat();
+  float t = server.arg(1).toFloat();
+  /*
   float angle = 100;
   float t = 1;
   for (uint8_t i = 0; i < server.args(); i++) {
@@ -162,12 +180,16 @@ void handle_set_angle_time() {
       t = server.arg(i).toFloat();
     }
   }
+  */
   set_angle_time(angle, t);
 
   server.send(200, "text/html", "Speed changed on sngle and time");
 }
 
 void handle_set_min_max() {
+  set_min(server.arg(0).toFloat());
+  set_max(server.arg(1).toFloat());
+  /*
   for (uint8_t i = 0; i < server.args(); i++) {
     if(server.argName(i) == (const String)"min") {
       set_min(server.arg(i).toFloat());
@@ -176,10 +198,14 @@ void handle_set_min_max() {
       set_max(server.arg(i).toFloat());
     }
   }
+  */
   server.send(200, "text/html", "Min and max set");
 }
 
 void handle_set_calibration_ranges() {
+  int angle_min = server.arg(0).toInt();
+  int angle_max = server.arg(1).toInt();
+  /*
   int angle_min;
   int angle_max;
   for (uint8_t i = 0; i < server.args(); i++) {
@@ -190,6 +216,7 @@ void handle_set_calibration_ranges() {
       angle_max = server.arg(i).toInt();
     }
   }
+  */
   set_calibration_ranges(angle_min, angle_max);
 
   server.send(200, "text/html", "calibration ranges set");
