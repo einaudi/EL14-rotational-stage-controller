@@ -27,6 +27,8 @@ void handle_set_angle_time();
 void handle_set_min_max();
 void handle_set_calibration_ranges();
 void handle_calibration_min_max();
+void handle_set_trigger_angles();
+void handle_set_trigger_power();
 // Cicero handler
 void handle_getdata();
 void handle_start();

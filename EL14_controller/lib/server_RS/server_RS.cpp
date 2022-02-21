@@ -22,7 +22,9 @@ const String available_cmds[] = {
   "set_angle_time",
   "set_min_max",
   "set_calibration_ranges",
-  "calibration_min_max"
+  "calibration_min_max",
+  "set_trigger_angles",
+  "set_trigger_power"
 };
 
 /* Put your SSID & Password */
@@ -46,6 +48,7 @@ void init_server() {
   
   // Server paths
   server.on("/", handle_OnConnect);
+  server.on("/test", handle_OnConnect);
   server.onNotFound(handle_NotFound);
   // Move
   server.on("/home", handle_home);
@@ -62,6 +65,8 @@ void init_server() {
   server.on("/set_min_max", handle_set_min_max);
   server.on("/set_calibration_ranges", handle_set_calibration_ranges);
   server.on("/calibration_min_max", handle_calibration_min_max);
+  server.on("/set_trigger_angles", handle_set_trigger_angles);
+  server.on("/set_trigger_power", handle_set_trigger_power);
   // Cicero handler
   server.on("/getdata", handle_getdata);
   server.on("/start", handle_start);
@@ -227,10 +232,64 @@ void handle_calibration_min_max() {
   calibration_min_max();
 }
 
+void handle_set_trigger_angles() {
+  float angle_start = server.arg(0).toFloat();
+  float angle_stop = server.arg(1).toFloat();
+  float t = server.arg(2).toFloat();
+  /*
+  float angle_start = 0.;
+  float angle_stop = 0.;
+  float t = 1.;
+  for (uint8_t i = 0; i < server.args(); i++) {
+    if(server.argName(i) == (const String)"start") {
+      angle_start = server.arg(i).toFloat();
+    }
+    else if(server.argName(i) == (const String)"stop") {
+      angle_stop = server.arg(i).toFloat();
+    }
+    else if(server.argName(i) == (const String)"time") {
+      t = server.arg(i).toFloat();
+    }
+  }
+  */
+  set_trigger(angle_start, angle_stop, t);
+
+  move_absolute(angle_start);
+}
+
+void handle_set_trigger_power() {
+  float power_start = server.arg(0).toFloat();
+  float power_stop = server.arg(1).toFloat();
+  float t = server.arg(2).toFloat();
+  /*
+  float power_start = 0.;
+  float power_stop = 0.;
+  float t = 1.;
+  for (uint8_t i = 0; i < server.args(); i++) {
+    if(server.argName(i) == (const String)"start") {
+      power_start = server.arg(i).toFloat();
+    }
+    else if(server.argName(i) == (const String)"stop") {
+      power_stop = server.arg(i).toFloat();
+    }
+    else if(server.argName(i) == (const String)"time") {
+      t = server.arg(i).toFloat();
+    }
+  }
+  */
+
+  float angle_start = power_to_angle(power_start);
+  float angle_stop = power_to_angle(power_stop);
+
+  set_trigger(angle_start, angle_stop, t);
+
+  move_absolute(angle_start);
+}
+
 // Cicero handler
 void handle_getdata() {
   // Server data
-  StaticJsonDocument<420> doc;
+  StaticJsonDocument<500> doc;
   doc["server_name"] = "EL14_controller";
   doc["receive_data"] = false;
   JsonArray cmds = doc.createNestedArray("available_commands");
@@ -254,6 +313,7 @@ void handle_getdata() {
 }
 
 void handle_start() {
+  move_trigger_start();
   server.send(200, "text/html", "ok");
 }
 
@@ -262,6 +322,7 @@ void handle_addproperty() {
 }
 
 void handle_end() {
+  move_min();
   server.send(200, "text/html", "ok");
 }
 

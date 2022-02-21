@@ -24,7 +24,7 @@ EL14 is managed with commands sent with http protocole over intranet. On boot no
 ### Command mode
 
 #### Command syntax
-Available commands are listed in section below. Command syntax follows url syntax from http protocole and looks like this: `http://device_ip/command?key1=value1&key2=value2`. For example if device is hosting a server under ip address 172.17.32.174 and one wants to rotate it to absolute position of 72.3 deg, the url will look like this: `http://172.17.32.174/move_absolute?deg=72.3`. If one wants to set new `angle_min` and `angle_max` values, the url will look like this: `http://172.17.32.174/set_min_max?min=0&max=100`.
+Available commands are listed in section below. Command syntax follows url syntax from http protocole and looks like this: `http://device_ip/command?key1=value1&key2=value2`. For example if device is hosting a server under ip address 172.17.32.174 and one wants to rotate it to absolute position of 72.3 deg, the url will look like this: `http://172.17.32.174/move_absolute?deg=72.3`. If one wants to set new `_angle_min` and `_angle_max` values, the url will look like this: `http://172.17.32.174/set_min_max?min=0&max=100`.
 
 **Important.** Parameters of commands which need them are obligatory for stable work of the device.
 
@@ -103,11 +103,38 @@ void handle_set_min_max() {
 }
 ```
 
+### Jog mode
+The device can be rotated in jog mode, where the movement is not caused by a command set, but by changing jog pins states. This mode doesn't need the communication and thus doesn't have time delay between the procedure start and movement. After jog step is done, the device sends a response through serial about its current position - here some delay may be built up.
+
+In jog mode the device can be rotated forward or backward by a predefined step. Jog step can be set with request `set_jog_step`.
+
 ### Trigger mode
-Device can be triggered on pin D6 which calls external interrupt handling routine. This function stops current job of the nodeMCU and moves the stage to `angle_min` position (this function can be changed in the software). This mode should be used when all other requests are done and device is ready as it may interfere with the request handling. It is useful when one wants to have precise timing of the rotation.
+Device can be triggered on pin D6 which calls external interrupt handling routine. This function stops current job of the nodeMCU and moves the stage to previously set position. This mode should be used when all other requests are done and device is ready as it may interfere with the request handling. It is useful when one wants to have precise timing of the rotation.
+
+By default, the device rotates to `_angle_trig_start` position when request `start` is called. Then, on trigger moves to position `_angle_trig_stop`. Both `_angle_trig_start` and `_angle_trig_stop` parameters can be set using either `set_trigger_angles` or `set_trigger_power` requests. In first case one inputs arbitrary angles, in second one inputs relative power which device converts to angles using calibration curve fit.
+
+To change the behaviour on trigger, function `rot_stage::handle_trig_interrupt` needs to be modified.
+
+**Important!** If trigger handling function uses commands to rotate the stage there is a constant delay of 20 ms between the trigger rise and the rotation. If jog functions are used, the rotation is instantenous upon trigger. **By default the trigger interrupt handling routine uses jog functions.** This can be changed in `rot_stage::handle_trig_interrupt`.
 
 ### Flashing new software
 Flashing new software faces the same problems as power up part - serial communication cross. For the upload of new software the devices should be disconnected. Current software in PlatfromIO project can be downloaded from gDrive [here](https://drive.google.com/drive/folders/1zUkqIa4bSzibQwh4zjUx1g9AN25MgS32?usp=sharing) or from github [here](https://github.com/einaudi/EL14-rotational-stage-controller.git).
+
+PlatformIO is a extension for VisualCodeStudio which is really helpful with microcontroller programming. To use it, add it to your VisualCode extensions and a new tab should appear with alien-ant-alike logo. Then download the project directory and open it using PlatformIO (not by Visual File > Open). Then one can modify the project or build it (it means compile everything in dependency tree) and upload. Sometimes small changes need to be done in platformio.ini file, such as COM port the device is connected to.
+
+### Calibration curve 
+After installing the stage in the setup we performed a calibration and got angle vs relative power dependence, to which a 7th order polynomial was fitted. Curve plot and fitted coefficients values are shown below.
+
+
+![speed_calibration](./graphics/calibration_curve_KCs.png)
+
+### Cicero sequence scheme
+For compatibility with Cicero sequence a few  requests handling functions are set by default. They can be changed and the device should be reprogrammed.
+
+1. `start` - the stage rotates to `_angle_trig_start` position.
+2. `addproperty` - device does nothing but returning code `200`
+3. trigger call - when trigger signal rises the stage rotates to `_angle_trig_stop` position
+4. `end` - the stage rotates to `_angle_min` position
 
 ## Available server paths
 ### `home`
@@ -145,12 +172,12 @@ Rotate backward by angle defined as jog step.
 Cicero syntax: `move_bwd@\n`
 
 ### `move_min`
-Rotate to absolute position defined as `angle_min`. `angle_min` can be set by command or by calibration and is stored in non-volatile memory (it is remembered after power down).
+Rotate to absolute position defined as `_angle_min`. `_angle_min` can be set by command or by calibration and is stored in non-volatile memory (it is remembered after power down).
 
 Cicero syntax: `move_min@\n`
 
 ### `move_max`
-Rotate to absolute position defined as `angle_max`. `angle_max` can be set by command or by calibration and is stored in non-volatile memory (it is remembered after power down).
+Rotate to absolute position defined as `_angle_max`. `_angle_max` can be set by command or by calibration and is stored in non-volatile memory (it is remembered after power down).
 
 Cicero syntax: `move_max@\n`
 
@@ -168,7 +195,7 @@ Cicero syntax: `set_speed@v\n`
 ![speed_calibration](./graphics/speed_calibration.png)
 
 ### `set_jog_step`
-Set the angle by which stage rotates when in jog mode.  
+Set the angle by which stage rotates when in jog mode. Jog step in stored in `_jog_step` variable and is remembered after power-down.  
 Parameters:
 
 * step - jog step [deg] to set
@@ -176,7 +203,7 @@ Parameters:
 Cicero syntax: `set_jog_step@step\n`
 
 ### `set_angle_time`
-Sets the velocity such that rotation by input angle will take input time.  
+Sets the speed such that rotation by input angle will take input time. This request changes just the **speed** of the device, it doesn't move anything.  
 Parameters:
 
 * angle - rotation angle [deg]
@@ -185,16 +212,16 @@ Parameters:
 Cicero syntax: `set_angle_time@angle_time\n`
 
 ### `set_min_max`
-Set `angle_min` and `angle_max` parameters. They are also stored in non-volatile memory and will be remembered after power-down.  
+Set `_angle_min` and `_angle_max` parameters. They are also stored in non-volatile memory and will be remembered after power-down.  
 Parameters:
 
-* min - angle [deg] to be set as `angle_min`
-* max - angle [deg] to be set as `angle_max`
+* min - angle [deg] to be set as `_angle_min`
+* max - angle [deg] to be set as `_angle_max`
 
 Cicero syntax: `set_min_max@min_max\n`
 
 ### `calibration_min_max`
-Turns on the calibration of `angle_min` and `angle_max` procedure. The stage goes to 0 deg absolute position and starts to rotate by 1 deg up to 120 deg (in this range it should cover polarizer/half-waveplate range of intensity change). At each position a measurement of light intensity is taken - photodiode must be connected. New values of `angle_min` and `angle_max` are calculated where the intensity is minimal and maximal respectively. If the angular range of calibration is too broad it needs to be changed as the procedure may detect two minimas/maximas and not acquire the following angles correctly.
+Turns on the calibration of `_angle_min` and `_angle_max` procedure. The stage goes to 0 deg absolute position and starts to rotate by 1 deg up to 120 deg (in this range it should cover polarizer/half-waveplate range of intensity change). At each position a measurement of light intensity is taken - photodiode must be connected. New values of `_angle_min` and `_angle_max` are calculated where the intensity is minimal and maximal respectively. If the angular range of calibration is too broad it needs to be changed as the procedure may detect two minimas/maximas and not acquire the following angles correctly.
 
 Cicero syntax: `calibration_min_max@\n`
 
@@ -207,4 +234,40 @@ Parameters:
 
 Cicero syntax: `set_calibration_ranges@min_max\n`
 
+### `set_trigger_angles`
+Set `_angle_trig_start` and `_angle_trig_stop` and time the rotation between them should take. Jog step is changed so it is equal to the difference of start and stop angles.   
+**Important!** This function also changes the speed settings and jog step.  
+Parameters:
 
+* start - angle to start the rotation from, device rotates to this position when `start` request is called
+* stop - angle to rotate to once triggered
+* time - time the rotation from start to stop should take
+
+Cicero syntax: `set_trigger_angles@start_stop_time\n`
+
+### `set_trigger_power`
+Set `_angle_trig_start` and `_angle_trig_stop` by relative power and time the rotation between them should take. Jog step is changed so it is equal to the difference of start and stop angles. Device automatically converts relative power to angles using fit to calibration curve.  
+**Important!** This function also changes the speed settings and jog step.  
+Parameters:
+
+* start - relative power (values 0 - 1)  to start the rotation from, device rotates to this position when `start` request is called
+* stop - relative power (values 0 - 1) to rotate to once triggered
+* time - time the rotation from start to stop should take
+
+Cicero syntax: `set_trigger_power@start_stop_time\n`
+
+## Cicero handler server paths
+### `getdata`
+Returns available commands of the server for handler purposes.
+
+### `test`
+Return `OK` for handler purposes
+
+### `start`
+Called at the beginning of the sequence. Rotates the device to `_angle_trig_start` position.
+
+### `addproperty`
+Returns code `200`, but does nothing. Just not to crush handler.
+
+### `end`
+Called at the end of the sequence. Rotates the device to `_angle_min` position.

@@ -19,6 +19,10 @@
 // EEPROM
 #define MIN_EEPROM_ADDRESS 0
 #define MAX_EEPROM_ADDRESS 4
+#define TRIG_START_EEPROM_ADDRESS 8
+#define TRIG_STOP_EEPROM_ADDRESS 12
+#define TRIG_TIME_EEPROM_ADDRESS 16
+#define JOG_STEP_EEPROM_ADDRESS 20
 
 #include <Arduino.h>
 
@@ -34,14 +38,22 @@ void move_fwd();
 void move_bwd();
 void move_min();
 void move_max();
+void move_trigger_start();
+void move_trigger_stop();
 // Settings
 void set_jog_step(float step);
 void set_speed(uint8_t v);
 void set_angle_time(float angle, float t);
 void set_min(float angle_min);
 void set_max(float angle_max);
+void set_trigger_start(float angle_start);
+void set_trigger_stop(float angle_stop);
+void set_trigger_time(float t);
+void set_trigger(float angle_start, float angle_stop, float t);
 void set_calibration_ranges(int angle_min, int angle_max);
 void calibration_min_max();
+// Calibration conversion
+float power_to_angle(float power);
 
 // Jog mode
 void jog_fwd();
