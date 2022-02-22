@@ -54,6 +54,7 @@ void init_server() {
   server.on("/home", handle_home);
   server.on("/move_absolute", handle_move_absolute);
   server.on("/move_relative", handle_move_relative);
+  server.on("/move_power", handle_move_power);
   server.on("/move_fwd", handle_move_fwd);
   server.on("/move_bwd", handle_move_bwd);
   server.on("/move_min", handle_move_min);
@@ -124,6 +125,18 @@ void handle_move_relative() {
   }
   */
   server.send(200, "text/html", "Position changed to relative");
+}
+
+void handle_move_power() {
+  move_power(server.arg(0).toFloat());
+  /*
+  for (uint8_t i = 0; i < server.args(); i++) {
+    if(server.argName(i) == (const String)"power") {
+      move_power(server.arg(i).toFloat());
+    }
+  }
+  */
+  server.send(200, "text/html", "Position changed to relative power");
 }
 
 void handle_move_fwd() {

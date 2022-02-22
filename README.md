@@ -161,6 +161,12 @@ Parameters:
 
 Cicero syntax: `move_relative@deg\n`
 
+### `move_power`
+Rotates the stage to absolute position at which relative power of the beam is equal to the input parameter. Device does the conversion automatically with parameters from calibration curve.  
+Parameters:
+
+* power - relative power (values 0-1) to rotate to 
+
 ### `move_fwd`
 Rotate forward by angle defined as jog step.
 

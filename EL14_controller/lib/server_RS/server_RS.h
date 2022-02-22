@@ -16,6 +16,7 @@ void handle_NotFound();
 void handle_home();
 void handle_move_absolute();
 void handle_move_relative();
+void handle_move_power();
 void handle_move_fwd();
 void handle_move_bwd();
 void handle_move_min();

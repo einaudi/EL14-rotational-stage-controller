@@ -54,7 +54,8 @@ void init_rot_stage() {
     Serial.print("0gs\n");
     String ret = Serial.readStringUntil('\n');
     set_speed(100);
-    move_home(1);
+    move_min();
+    set_trigger(_angle_trig_start, _angle_trig_stop, _time_trig);
 }
 
 String send_cmd(String cmd) {
@@ -94,6 +95,11 @@ void move_relative(float angle) {
     sprintf(cmd, "0mr%08X", angle_p);
 
     send_cmd(cmd);
+}
+
+void move_power(float power) {
+    float angle = power_to_angle(power);
+    move_absolute(angle);
 }
 
 void move_fwd() {
@@ -250,7 +256,7 @@ float power_to_angle(float power) {
     ret += 1.0395e4 * pow(power, 6.);
     ret += -2.9311e3 * pow(power, 7.);
 
-    return power;
+    return ret;
 }
 
 // Jog mode

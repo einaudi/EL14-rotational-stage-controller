@@ -34,6 +34,7 @@ void cancel_cmd();
 void move_home(bool dir);
 void move_absolute(float angle);
 void move_relative(float angle);
+void move_power(float power);
 void move_fwd();
 void move_bwd();
 void move_min();
