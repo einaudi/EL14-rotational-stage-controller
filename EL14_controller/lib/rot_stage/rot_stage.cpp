@@ -53,8 +53,8 @@ void init_rot_stage() {
     
     Serial.print("0gs\n");
     String ret = Serial.readStringUntil('\n');
-    set_speed(100);
-    move_min();
+    // set_speed(100);
+    // move_min();
     set_trigger(_angle_trig_start, _angle_trig_stop, _time_trig);
 }
 
@@ -271,7 +271,7 @@ void jog_fwd() {
     digitalWrite(FWD, HIGH);
     digitalWrite(JOG, HIGH);
 
-    String ret = Serial.readStringUntil('\n');
+    // String ret = Serial.readStringUntil('\n');
 }
 
 void jog_bwd() {
@@ -285,7 +285,7 @@ void jog_bwd() {
     digitalWrite(BWD, HIGH);
     digitalWrite(JOG, HIGH);
 
-    String ret = Serial.readStringUntil('\n');
+    // String ret = Serial.readStringUntil('\n');
 }
 
 // External interrupt

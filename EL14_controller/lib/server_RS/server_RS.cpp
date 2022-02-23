@@ -140,23 +140,23 @@ void handle_move_power() {
 }
 
 void handle_move_fwd() {
-  move_fwd();
   server.send(200, "text/html", "Moved forward");
+  move_fwd();
 }
 
 void handle_move_bwd() {
-  move_bwd();
   server.send(200, "text/html", "Moved backward");
+  move_bwd();
 }
 
 void handle_move_min() {
-  move_min();
   server.send(200, "text/html", "Moved to min");
+  move_min();
 }
 
 void handle_move_max() {
-  move_max();
   server.send(200, "text/html", "Moved to max");
+  move_max();
 }
 
 // Settings
@@ -199,9 +199,8 @@ void handle_set_angle_time() {
     }
   }
   */
-  set_angle_time(angle, t);
-
   server.send(200, "text/html", "Speed changed on sngle and time");
+  set_angle_time(angle, t);
 }
 
 void handle_set_min_max() {
@@ -265,9 +264,11 @@ void handle_set_trigger_angles() {
     }
   }
   */
+  server.send(200, "text/html", "Changed trigger settings by angle");
   set_trigger(angle_start, angle_stop, t);
 
   move_absolute(angle_start);
+
 }
 
 void handle_set_trigger_power() {
@@ -290,6 +291,7 @@ void handle_set_trigger_power() {
     }
   }
   */
+  server.send(200, "text/html", "Changed trigger settings by power");
 
   float angle_start = power_to_angle(power_start);
   float angle_stop = power_to_angle(power_stop);
@@ -326,8 +328,8 @@ void handle_getdata() {
 }
 
 void handle_start() {
-  move_trigger_start();
   server.send(200, "text/html", "ok");
+  // move_trigger_start();
 }
 
 void handle_addproperty() {
@@ -335,8 +337,8 @@ void handle_addproperty() {
 }
 
 void handle_end() {
-  move_min();
   server.send(200, "text/html", "ok");
+  // move_min();
 }
 
 // Misc

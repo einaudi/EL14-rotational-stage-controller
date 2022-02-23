@@ -129,12 +129,12 @@ After installing the stage in the setup we performed a calibration and got angle
 ![speed_calibration](./graphics/calibration_curve_KCs.png)
 
 ### Cicero sequence scheme
-For compatibility with Cicero sequence a few  requests handling functions are set by default. They can be changed and the device should be reprogrammed.
+The device has `receive_data` parameter equal to `false` which means it doesn't get `start` and `end` requests from handler. However, they are included in server paths for future development or specific needs. Main idea is that if user wants to rotate the device it should be called explicitly, so one can trace all delays in the system.
 
-1. `start` - the stage rotates to `_angle_trig_start` position.
-2. `addproperty` - device does nothing but returning code `200`
-3. trigger call - when trigger signal rises the stage rotates to `_angle_trig_stop` position
-4. `end` - the stage rotates to `_angle_min` position
+To properly use the trigger mode a schema should be used:
+
+1. `set_trigger_[angles/power]` - device sets trigger parameters and rotates to `_angle_trig_start` position
+2. trigger call - when trigger signal rises the stage rotates to `_angle_trig_stop` position
 
 ## Available server paths
 ### `home`
