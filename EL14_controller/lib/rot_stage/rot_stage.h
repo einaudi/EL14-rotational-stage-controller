@@ -30,6 +30,7 @@
 void init_rot_stage();
 String send_cmd(String cmd);
 void cancel_cmd();
+void update_eeprom_float(int eeprom_address, float eeprom_value);
 // Movement
 void move_home(bool dir);
 void move_absolute(float angle);

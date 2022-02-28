@@ -354,7 +354,7 @@ void blink(int n) {
 void send_ip() {
   HTTPClient http;
 
-  String url = "http://172.17.32.126:7777/" + WiFi.localIP().toString();
+  String url = "http://172.17.32.127:7777/" + WiFi.localIP().toString();
 
   http.begin(url.c_str());
   http.GET();

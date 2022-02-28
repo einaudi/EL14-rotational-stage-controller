@@ -56,6 +56,7 @@ void init_rot_stage() {
     // set_speed(100);
     // move_min();
     set_trigger(_angle_trig_start, _angle_trig_stop, _time_trig);
+    move_home(1);
 }
 
 String send_cmd(String cmd) {
@@ -70,6 +71,15 @@ void cancel_cmd() {
     while(!digitalRead(MOT)) {}
     Serial.print(0x0D);
     delay(1);
+}
+
+void update_eeprom_float(int eeprom_address, float eeprom_value) {
+    float current_value = 0;
+    EEPROM.get(eeprom_address, current_value);
+    if(current_value != eeprom_value) {
+        EEPROM.put(eeprom_address, eeprom_value);
+        EEPROM.commit();
+    }
 }
 
 // Movement
@@ -136,14 +146,14 @@ void set_jog_step(float step) {
     send_cmd(cmd);
 
     _jog_step = step;
-    EEPROM.put(JOG_STEP_EEPROM_ADDRESS, _jog_step);
+    update_eeprom_float(JOG_STEP_EEPROM_ADDRESS, _jog_step);
     EEPROM.commit();
 }
 
 void set_speed(uint8_t v) {
     char cmd[5];
     v = v > 100 ? 100 : v;
-    v = v < 1 ? 1 : v;
+    v = v < 20 ? 20 : v;
     sprintf(cmd, "0sv%02X", v);
 
     send_cmd(cmd);
@@ -152,25 +162,27 @@ void set_speed(uint8_t v) {
 void set_angle_time(float angle, float t) {
     float v_d = float(angle)/float(t);
     // Workaround to match calibration
-    v_d = (v_d - 13.67)/0.826;
+    // v_d = (v_d - 13.67)/0.826;
 
-    float v_p = -4.7929;
-    v_p += 3.0265e-1 * v_d;
-    v_p += -6.7971e-4 * v_d * v_d;
-    v_p += 7.3075e-7 * v_d * v_d * v_d;
+    float v_p = -2.7599e1;
+    v_p += 9.3611e-1 * v_d;
+    v_p += -6.8103e-3 * pow(v_d, 2.);
+    v_p += 2.913e-5 * pow(v_d, 3.);
+    v_p = -5.9180e-8 * pow(v_d, 4.);
+    v_p = 4.7826e-11 * pow(v_d, 5.);
 
     set_speed((uint8_t) v_p);
 }
 
 void set_min(float angle_min) {
     _angle_min = angle_min;
-    EEPROM.put(MIN_EEPROM_ADDRESS, _angle_min);
+    update_eeprom_float(MIN_EEPROM_ADDRESS, _angle_min);
     EEPROM.commit();
 }
 
 void set_max(float angle_max) {
     _angle_max = angle_max;
-    EEPROM.put(MAX_EEPROM_ADDRESS, _angle_max);
+    update_eeprom_float(MAX_EEPROM_ADDRESS, _angle_max);
     EEPROM.commit();
 }
 
@@ -214,19 +226,19 @@ void calibration_min_max() {
 
 void set_trigger_start(float angle_start) {
     _angle_trig_start = angle_start;
-    EEPROM.put(TRIG_START_EEPROM_ADDRESS, _angle_trig_start);
+    update_eeprom_float(TRIG_START_EEPROM_ADDRESS, _angle_trig_start);
     EEPROM.commit();
 }
 
 void set_trigger_stop(float angle_stop) {
     _angle_trig_stop = angle_stop;
-    EEPROM.put(TRIG_STOP_EEPROM_ADDRESS, _angle_trig_stop);
+    update_eeprom_float(TRIG_STOP_EEPROM_ADDRESS, _angle_trig_stop);
     EEPROM.commit();
 }
 
 void set_trigger_time(float t) {
     _time_trig = t;
-    EEPROM.put(TRIG_TIME_EEPROM_ADDRESS, _time_trig);
+    update_eeprom_float(TRIG_TIME_EEPROM_ADDRESS, _time_trig);
     EEPROM.commit();
 }
 
